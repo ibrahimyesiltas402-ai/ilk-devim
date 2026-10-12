@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-İnşaat Proje Maliyeti Tahmin Aracı
+İnşaat Proje Sure Tahmin Aracı
 Hafta 2'de kurduğumuz lineer regresyon modellerinin "gerçek kullanım ortamı".
 Kod bilmeyen biri bile bu ekrandan tahmini maliyeti öğrenebilir.
 """
@@ -14,7 +14,7 @@ import streamlit as st
 # Sayfa ayarları ve stil
 # ------------------------------------------------------------------
 st.set_page_config(
-    page_title="İnşaat Maliyet Tahmin Aracı",
+    page_title="İnşaat Sure Tahmin Aracı",
     page_icon="🏗️",
     layout="centered",
 )
@@ -72,7 +72,7 @@ st.markdown(f"""
 
 st.markdown("""
 <div class="app-header">
-    <h1>🏗️ İnşaat Proje Maliyeti Tahmin Aracı</h1>
+    <h1>🏗️ İnşaat Proje Sure Tahmin Aracı</h1>
     <p>İnşaat Mühendisliğinde Yapay Zekâ Uygulamaları — Hafta 2 Lab Projesi</p>
 </div>
 """, unsafe_allow_html=True)
@@ -82,8 +82,8 @@ st.markdown("""
 # ------------------------------------------------------------------
 @st.cache_resource
 def yukle():
-    basit = joblib.load("models/maliyet_modeli_basit.pkl")
-    gelismis = joblib.load("models/maliyet_modeli_gelismis.pkl")
+    basit = joblib.load("models/sure_modeli_basit.pkl")
+    gelismis = joblib.load("models/sure_modeli_gelismis.pkl")
     with open("models/meta.json", encoding="utf-8") as f:
         meta = json.load(f)
     return basit, gelismis, meta
@@ -115,7 +115,7 @@ if gelismis_mi:
     m = meta["gelismis_model"]
     st.sidebar.metric("Test R²", f"{m['r2']:.3f}")
     st.sidebar.metric("Train R²", f"{m['train_r2']:.3f}")
-    st.sidebar.metric("Test MAE", f"{m['mae']:,.0f} TL")
+    st.sidebar.metric("Test MAE", f"{m['mae']:,.1f} AY")
     st.sidebar.caption(
         "⚠️ Train R² ile Test R² arasındaki büyük fark, bu modelin "
         "**aşırı öğrenme (overfitting)** riski taşıdığını gösterir — "
@@ -124,7 +124,7 @@ if gelismis_mi:
 else:
     m = meta["basit_model"]
     st.sidebar.metric("Test R²", f"{m['r2']:.3f}")
-    st.sidebar.metric("Test MAE", f"{m['mae']:,.0f} TL")
+    st.sidebar.metric("Test MAE", f"{m['mae']:,.1f} AY")
     st.sidebar.caption(
         "⚠️ R² negatif — bu, modelin sadece 2 değişkenle (alan, kat) "
         "yeterince açıklayıcı olmadığının işaretidir."
@@ -181,7 +181,7 @@ if gelismis_mi:
 # ------------------------------------------------------------------
 # Tahmin
 # ------------------------------------------------------------------
-if st.button("💰 Maliyeti Tahmin Et", type="primary", use_container_width=True):
+if st.button("💰 Sure Tahmin Et", type="primary", use_container_width=True):
     if gelismis_mi:
         row = {"alan_m2": alan_m2, "kat_sayisi": kat_sayisi, "insaat_yili": insaat_yili,
                "zemin_sinifi_B": 0, "zemin_sinifi_C": 0, "zemin_sinifi_D": 0}
@@ -196,8 +196,8 @@ if st.button("💰 Maliyeti Tahmin Et", type="primary", use_container_width=True
     if uyarilar:
         st.markdown(f"""
         <div class="result-box" style="background-color:{RED};">
-            <div class="value">{tahmin:,.0f} TL</div>
-            <div class="label">Tahmini Toplam Maliyet — GÜVENİLİR DEĞİL</div>
+            <div class="value">{tahmin:,.1f} AY</div>
+            <div class="label">Tahmini Toplam Sure — GÜVENİLİR DEĞİL</div>
         </div>
         """, unsafe_allow_html=True)
         st.markdown(
@@ -209,8 +209,8 @@ if st.button("💰 Maliyeti Tahmin Et", type="primary", use_container_width=True
     else:
         st.markdown(f"""
         <div class="result-box">
-            <div class="value">{tahmin:,.0f} TL</div>
-            <div class="label">Tahmini Toplam Maliyet</div>
+            <div class="value">{tahmin:,.1f} AY</div>
+            <div class="label">Tahmini Toplam Sure</div>
         </div>
         """, unsafe_allow_html=True)
         st.markdown(
@@ -224,10 +224,10 @@ if st.button("💰 Maliyeti Tahmin Et", type="primary", use_container_width=True
             st.markdown(f"""
 Gelişmiş model, her özelliğin katsayısını (diğerleri sabitken) şu şekilde kullanır:
 
-- Alan katsayısı: **{c['alan_m2']:,.0f} TL/m²**
-- Kat katsayısı: **{c['kat_sayisi']:,.0f} TL/kat**
-- Yıl katsayısı: **{c['insaat_yili']:,.0f} TL/yıl**
-- Zemin B/C/D etkisi: **{c['zemin_sinifi_B']:,.0f}** / **{c['zemin_sinifi_C']:,.0f}** / **{c['zemin_sinifi_D']:,.0f}** TL (A zeminine göre farkı)
+- Alan katsayısı: **{c['alan_m2']:,.4f} AY/m²**
+- Kat katsayısı: **{c['kat_sayisi']:,.4f} AY/kat**
+- Yıl katsayısı: **{c['insaat_yili']:,.4f} AY/yıl**
+- Zemin B/C/D etkisi: **{c['zemin_sinifi_B']:,.0f}** / **{c['zemin_sinifi_C']:,.0f}** / **{c['zemin_sinifi_D']:,.0f}** AY (A zeminine göre farkı)
             """)
         else:
             b = meta["basit_model"]
